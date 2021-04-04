@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,15 @@ public class ImapMailReceiver extends AbstractMailReceiver {
 			Message[] messages = event.getMessages();
 			if (messages.length > 0) {
 				// this will return the flow to the idle call
-				messages[0].getFolder().isOpen();
+				try {
+					((IMAPFolder) messages[0].getFolder()).doCommand(protocol -> {
+						protocol.noop();
+						return null;
+					});
+				}
+				catch (MessagingException e) {
+					throw new IllegalStateException(e);
+				}
 			}
 		}
 
